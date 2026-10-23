@@ -15,7 +15,7 @@ def cadastrar():
         return
     try:
         salvar_nome(nome, telefone)
-        messagebox.showinfo("Sucesso", "Nome salvo com sucesso!")
+        messagebox.showinfo("Sucesso", "Registro salvo com sucesso!")
         entry_nome.delete(0, tk.END)
         entry_telefone.delete(0, tk.END)
         atualizar_tabela()
@@ -102,3 +102,11 @@ except Exception as e:
     print(f"Erro ao carregar dados: {e}")
 
 janela.mainloop()
+
+
+
+
+
+
+
+

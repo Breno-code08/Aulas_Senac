@@ -8,3 +8,4 @@ class TabelaNome (Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     nome = Column(String(100))
+    telefone = Column(String(100))

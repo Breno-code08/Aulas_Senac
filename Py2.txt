@@ -1,2 +1,0 @@
-numero = int (input("Escreva um numero: "))
-    print (f"Seu numero é" numero)

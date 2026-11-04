@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Organize e consulte espaços de estudo.">
+    <title>{% block title %}Espaço de Estudos{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <script defer src="{{ url_for('static', filename='js/main.js') }}"></script>
+</head>
+<body>
+    <header class="site-header">
+        <nav class="navigation container" aria-label="Navegação principal">
+            <a class="brand" href="{{ url_for('main.index') }}">Espaço de Estudos</a>
+            <div class="nav-links">
+                <a href="{{ url_for('main.index') }}">Início</a>
+                <a href="{{ url_for('study_spaces.list_spaces') }}">Espaços</a>
+                <a class="button button-small" href="{{ url_for('study_spaces.create') }}">Novo espaço</a>
+            </div>
+        </nav>
+    </header>
+    <main class="container page-content">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-list" aria-live="polite">
+                    {% for category, message in messages %}
+                        <div class="flash flash-{{ category }}" role="status">
+                            <span>{{ message }}</span>
+                            <button class="flash-close" type="button" aria-label="Fechar mensagem">&times;</button>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+    <footer class="site-footer">
+        <div class="container">Espaço de Estudos <span>·</span> Organização para aprender melhor</div>
+    </footer>
+</body>
+</html>

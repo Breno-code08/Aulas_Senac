@@ -1,0 +1,71 @@
+{% extends "base.html" %}
+{% block title %}Editar {{ material.subject }} | Espaço de Estudos{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('study_spaces.detail', space_id=space.id) }}">← Voltar para {{ space.name }}</a>
+<section class="form-card">
+    <p class="eyebrow">Atualizar conteúdo</p>
+    <h1>Editar matéria ou material</h1>
+    {% if material.pdf_storage_name %}
+        <p class="form-intro">
+            PDF atual:
+            <a class="material-link" href="{{ url_for('materials.download_pdf', space_id=space.id, material_id=material.id) }}">{{ material.pdf_filename or "Baixar PDF" }}</a>.
+            Selecione outro arquivo somente se quiser substituí-lo.
+        </p>
+    {% else %}
+        <p class="form-intro">O conteúdo escrito é obrigatório. O PDF e o link de videoaula são opcionais.</p>
+    {% endif %}
+    {% if material.resources %}
+        <section class="additional-material-list" aria-label="Conteúdos adicionais existentes">
+            <h2>Conteúdos adicionais</h2>
+            {% for resource in material.resources %}
+                <div class="additional-material">
+                    {% if resource.kind == "content" %}
+                        <div class="material-description">{{ resource.content }}</div>
+                    {% elif resource.kind == "pdf" %}
+                        <a class="material-link" href="{{ url_for('materials.download_resource_pdf', space_id=space.id, material_id=material.id, resource_id=resource.id) }}">↓ Baixar {{ resource.pdf_filename or "PDF" }}</a>
+                    {% elif resource.kind == "video" %}
+                        <a class="material-link" href="{{ resource.video_url }}" target="_blank" rel="noopener noreferrer">▶ Assistir videoaula adicional</a>
+                    {% endif %}
+                    <form method="post" action="{{ url_for('materials.delete_resource', space_id=space.id, material_id=material.id, resource_id=resource.id) }}" data-confirm="Excluir este conteúdo adicional?">
+                        <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                        <button class="button button-quiet button-small" type="submit">Remover</button>
+                    </form>
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('materials.edit', space_id=space.id, material_id=material.id) }}" novalidate>
+        {{ form.hidden_tag() }}
+        <input type="hidden" name="remove_primary_content" value="0">
+        <div class="form-field">
+            {{ form.subject.label }}
+            {{ form.subject(placeholder="Ex.: Matemática — funções") }}
+            {% for error in form.subject.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-field">
+            {{ form.content.label }}
+            {{ form.content(rows="7", placeholder="Escreva aqui os conteúdos, anotações ou tópicos do assunto...") }}
+            {% for error in form.content.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            {% if material.content %}
+                <button class="button button-quiet button-small" type="button" data-remove-primary-content>Remover conteúdo principal</button>
+            {% endif %}
+        </div>
+        <div class="form-field">
+            {{ form.pdf.label }} <span class="field-hint">(opcional)</span>
+            {{ form.pdf(accept=".pdf,application/pdf") }}
+            <span class="field-hint">Somente PDF, até 16 MB.</span>
+            {% for error in form.pdf.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-field">
+            {{ form.video_url.label }} <span class="field-hint">(opcional)</span>
+            {{ form.video_url(placeholder="https://...") }}
+            {% for error in form.video_url.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        {% include "materials/_additional_resources.html" %}
+        <div class="action-row">
+            {{ form.submit(class="button") }}
+            <a class="button button-outline" href="{{ url_for('study_spaces.detail', space_id=space.id) }}">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

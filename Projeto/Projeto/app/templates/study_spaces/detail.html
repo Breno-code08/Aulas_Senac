@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+{% block title %}{{ space.name }} | Espaço de Estudos{% endblock %}
+{% block content %}
+{% macro material_card(material, space) %}
+    <article class="material-card{% if material.completed %} material-card-completed{% endif %}">
+        <div class="material-content">
+            <h3>{{ material.subject }}</h3>
+            <div class="material-description">{{ material.content }}</div>
+            <div class="material-links">
+                {% if material.pdf_storage_name %}
+                    <a class="material-link" href="{{ url_for('materials.download_pdf', space_id=space.id, material_id=material.id) }}">↓ Baixar {{ material.pdf_filename or "PDF" }}</a>
+                {% endif %}
+                {% if material.video_url %}
+                    <a class="material-link" href="{{ material.video_url }}" target="_blank" rel="noopener noreferrer">▶ Assistir videoaula</a>
+                {% endif %}
+            </div>
+            {% if material.resources %}
+                <div class="additional-material-list">
+                    {% for resource in material.resources %}
+                        <div class="additional-material">
+                            {% if resource.kind == "content" %}
+                                <div class="material-description">{{ resource.content }}</div>
+                            {% elif resource.kind == "pdf" %}
+                                <a class="material-link" href="{{ url_for('materials.download_resource_pdf', space_id=space.id, material_id=material.id, resource_id=resource.id) }}">↓ Baixar {{ resource.pdf_filename or "PDF" }}</a>
+                            {% elif resource.kind == "video" %}
+                                <a class="material-link" href="{{ resource.video_url }}" target="_blank" rel="noopener noreferrer">▶ Assistir videoaula adicional</a>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+        <div class="material-actions">
+            <form method="post" action="{{ url_for('materials.set_status', space_id=space.id, material_id=material.id, status='reabrir' if material.completed else 'concluir') }}">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="button button-small{% if material.completed %} button-outline{% endif %}" type="submit">
+                    {{ "Mover para pendentes" if material.completed else "Marcar como concluída" }}
+                </button>
+            </form>
+            <a class="button button-outline button-small" href="{{ url_for('materials.edit', space_id=space.id, material_id=material.id) }}">Editar</a>
+            <form method="post" action="{{ url_for('materials.delete', space_id=space.id, material_id=material.id) }}" data-confirm="Excluir este material?">
+                <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                <button class="button button-danger button-small" type="submit">Excluir</button>
+            </form>
+        </div>
+    </article>
+{% endmacro %}
+<a class="back-link" href="{{ url_for('study_spaces.list_spaces') }}">← Todos os espaços</a>
+<article class="detail-card space-color-{{ space.color }}">
+    <p class="eyebrow">{{ space.location or "Localização não informada" }}</p>
+    <h1 class="space-title"><span class="space-icon" aria-hidden="true">{{ space.icon_symbol }}</span>{{ space.name }}</h1>
+    <div class="detail-description">{{ space.description or "Nenhuma descrição foi informada." }}</div>
+    <div class="detail-meta"><span>Adicionado em {{ space.created_at.strftime("%d/%m/%Y") }}</span></div>
+    <div class="action-row">
+        <a class="button" href="{{ url_for('study_spaces.edit', space_id=space.id) }}">Editar espaço</a>
+        <form method="post" action="{{ url_for('study_spaces.delete', space_id=space.id) }}" data-confirm="Tem certeza de que deseja excluir este espaço?">
+            <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+            <button class="button button-danger" type="submit">Excluir</button>
+        </form>
+    </div>
+</article>
+<section class="materials-section">
+    <div class="section-heading">
+        <div>
+            <p class="eyebrow">Conteúdo para aprender</p>
+            <h2>Matérias e materiais</h2>
+        </div>
+    </div>
+
+    {% set pending_materials = space.materials | rejectattr("completed") | list %}
+    {% set completed_materials = space.materials | selectattr("completed") | list %}
+    {% if not space.materials %}
+        <div class="empty-state materials-empty">
+            <h3>Nenhum material adicionado ainda.</h3>
+            <p>Escreva o conteúdo de um assunto e, se quiser, anexe um PDF ou adicione uma videoaula.</p>
+        </div>
+    {% endif %}
+    <section class="material-status-section">
+        <h3>Pendentes <span class="material-count">{{ pending_materials|length }}</span></h3>
+        {% if pending_materials %}
+            <div class="materials-list">
+                {% for material in pending_materials %}{{ material_card(material, space) }}{% endfor %}
+            </div>
+        {% else %}
+            <p class="status-empty">Nenhuma matéria pendente.</p>
+        {% endif %}
+    </section>
+    <section class="material-status-section">
+        <h3>Concluídas <span class="material-count">{{ completed_materials|length }}</span></h3>
+        {% if completed_materials %}
+            <div class="materials-list">
+                {% for material in completed_materials %}{{ material_card(material, space) }}{% endfor %}
+            </div>
+        {% else %}
+            <p class="status-empty">Nenhuma matéria concluída.</p>
+        {% endif %}
+    </section>
+
+    {% set material_form = material_form|default(none) %}
+    <section class="form-card material-form-card">
+        <p class="eyebrow">Novo conteúdo</p>
+        <h2>Adicionar matéria ou material</h2>
+        <p class="form-intro">Escreva o conteúdo do assunto. Anexar um PDF e incluir um link de videoaula são opcionais.</p>
+        <form method="post" enctype="multipart/form-data" action="{{ url_for('materials.create', space_id=space.id) }}" novalidate>
+            {{ material_form.hidden_tag() }}
+            <div class="form-field">
+                {{ material_form.subject.label }}
+                {{ material_form.subject(placeholder="Ex.: Matemática — funções") }}
+                {% for error in material_form.subject.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            <div class="form-field">
+                {{ material_form.content.label }}
+                {{ material_form.content(rows="7", placeholder="Escreva aqui os conteúdos, anotações ou tópicos do assunto...") }}
+                {% for error in material_form.content.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            <div class="form-field">
+                {{ material_form.pdf.label }} <span class="field-hint">(opcional)</span>
+                {{ material_form.pdf(accept=".pdf,application/pdf") }}
+                <span class="field-hint">Somente PDF, até 16 MB.</span>
+                {% for error in material_form.pdf.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            <div class="form-field">
+                {{ material_form.video_url.label }} <span class="field-hint">(opcional)</span>
+                {{ material_form.video_url(placeholder="https://...") }}
+                {% for error in material_form.video_url.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+            </div>
+            {% include "materials/_additional_resources.html" %}
+            <div class="action-row">
+                {{ material_form.submit(class="button") }}
+            </div>
+        </form>
+    </section>
+</section>
+{% endblock %}

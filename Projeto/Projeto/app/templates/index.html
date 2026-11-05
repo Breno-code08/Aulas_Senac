@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Início | Espaço de Estudos{% endblock %}
+{% block content %}
+<section class="hero">
+    <div class="hero-brand">
+        <img class="home-logo" src="{{ url_for('static', filename='images/study-logo.png') }}" alt="">
+        <p class="eyebrow">Seu espaço, seu foco</p>
+    </div>
+    <h1>Organize seus materiais de estudo.</h1>
+    <p class="hero-copy">Reúna assuntos, PDFs e videoaulas no seu espaço pessoal de estudos.</p>
+    <a class="button" href="{{ url_for('study_spaces.list_spaces') }}">Explorar espaços</a>
+</section>
+<section class="section">
+    <div class="section-heading">
+        <div><p class="eyebrow">Organização simples</p><h2>Espaços recentes</h2></div>
+        <a class="text-link" href="{{ url_for('study_spaces.list_spaces') }}">Ver todos →</a>
+    </div>
+    {% if spaces %}
+        <div class="card-grid">
+            {% for space in spaces %}
+                <article class="space-card space-color-{{ space.color }}">
+                    <div class="space-card-heading">
+                        <span class="space-icon" aria-hidden="true">{{ space.icon_symbol }}</span>
+                        <p class="card-kicker">{{ space.location or "Espaço pessoal de estudo" }}</p>
+                    </div>
+                    <h3><a href="{{ url_for('study_spaces.detail', space_id=space.id) }}">{{ space.name }}</a></h3>
+                    <p>{{ space.description or "Sem descrição cadastrada." }}</p>
+                    <a class="button button-small home-space-link" href="{{ url_for('study_spaces.detail', space_id=space.id) }}">
+                        Abrir espaço <span aria-hidden="true">→</span>
+                    </a>
+                </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <h3>Seu primeiro espaço começa aqui.</h3>
+            <p>Ainda não há espaços cadastrados.</p>
+            <a class="button button-outline" href="{{ url_for('study_spaces.create') }}">Cadastrar espaço</a>
+        </div>
+    {% endif %}
+</section>
+{% endblock %}

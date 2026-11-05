@@ -1,0 +1,54 @@
+<section class="additional-resources" aria-labelledby="additional-resources-title">
+    <div>
+        <p class="eyebrow">Mais materiais</p>
+        <h2 id="additional-resources-title">Adicionar outros conteúdos</h2>
+        <p class="form-intro">Você pode incluir vários textos, PDFs e links nesta matéria.</p>
+    </div>
+    {% for error in additional_errors|default([]) %}
+        <span class="field-error">{{ error }}</span>
+    {% endfor %}
+
+    <div class="form-field">
+        <span class="field-label">Textos adicionais</span>
+        <div class="repeatable-list" id="additional-content-list">
+            {% for content in additional_contents|default([]) %}
+                <div class="repeatable-entry">
+                    <textarea name="additional_contents" rows="4" maxlength="10000" placeholder="Escreva mais um conteúdo...">{{ content }}</textarea>
+                    <button class="button button-quiet button-small" type="button" data-remove-resource aria-label="Remover este conteúdo">Remover</button>
+                </div>
+            {% endfor %}
+        </div>
+        <button class="button button-outline button-small" type="button" data-add-resource="additional-content-list" data-resource-template="additional-content-template">+ Adicionar conteúdo</button>
+        <template id="additional-content-template">
+            <div class="repeatable-entry">
+                <textarea name="additional_contents" rows="4" maxlength="10000" placeholder="Escreva mais um conteúdo..."></textarea>
+                <button class="button button-quiet button-small" type="button" data-remove-resource aria-label="Remover este conteúdo">Remover</button>
+            </div>
+        </template>
+    </div>
+
+    <div class="form-field">
+        <label for="additional-pdfs">PDFs adicionais</label>
+        <input id="additional-pdfs" type="file" name="additional_pdfs" accept=".pdf,application/pdf" multiple>
+        <span class="field-hint">Selecione um ou mais PDFs. Máximo de 16 MB por arquivo.</span>
+    </div>
+
+    <div class="form-field">
+        <span class="field-label">Links de videoaulas adicionais</span>
+        <div class="repeatable-list" id="additional-video-list">
+            {% for video_url in additional_video_urls|default([]) %}
+                <div class="repeatable-entry">
+                    <input type="url" name="additional_video_urls" value="{{ video_url }}" maxlength="2048" placeholder="https://...">
+                    <button class="button button-quiet button-small" type="button" data-remove-resource aria-label="Remover este link">Remover</button>
+                </div>
+            {% endfor %}
+        </div>
+        <button class="button button-outline button-small" type="button" data-add-resource="additional-video-list" data-resource-template="additional-video-template">+ Adicionar link</button>
+        <template id="additional-video-template">
+            <div class="repeatable-entry">
+                <input type="url" name="additional_video_urls" maxlength="2048" placeholder="https://...">
+                <button class="button button-quiet button-small" type="button" data-remove-resource aria-label="Remover este link">Remover</button>
+            </div>
+        </template>
+    </div>
+</section>

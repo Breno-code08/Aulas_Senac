@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}Editar {{ space.name }} | Espaço de Estudos{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('study_spaces.detail', space_id=space.id) }}">← Voltar aos detalhes</a>
+<section class="form-card">
+    <p class="eyebrow">Atualizar cadastro</p>
+    <h1>Editar espaço</h1>
+    <p class="form-intro">Altere os dados de {{ space.name }}.</p>
+    <form method="post" novalidate>
+        {% include "study_spaces/_fields.html" %}
+    </form>
+</section>
+{% endblock %}

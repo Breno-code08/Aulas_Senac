@@ -1,0 +1,10 @@
+{% extends "base.html" %}
+{% block title %}Erro interno | Espaço de Estudos{% endblock %}
+{% block content %}
+<section class="empty-state error-state">
+    <p class="eyebrow">Erro 500</p>
+    <h1>Algo deu errado.</h1>
+    <p>Não foi possível concluir sua solicitação. Tente novamente em instantes.</p>
+    <a class="button" href="{{ url_for('main.index') }}">Voltar ao início</a>
+</section>
+{% endblock %}

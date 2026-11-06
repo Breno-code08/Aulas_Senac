@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block title %}Criar conta | Espaço de Estudos{% endblock %}
+{% block content %}
+<section class="form-card auth-card">
+    <p class="eyebrow">Seu espaço pessoal</p>
+    <h1>Criar conta</h1>
+    <p class="form-intro">Cada conta mantém seus espaços e materiais privados.</p>
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="form-field">
+            {{ form.email.label }}
+            {{ form.email(autocomplete="email", placeholder="voce@exemplo.com") }}
+            {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-field">
+            {{ form.password.label }}
+            {{ form.password(autocomplete="new-password") }}
+            <span class="field-hint">Use de 12 a 128 caracteres.</span>
+            {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-field">
+            {{ form.confirm_password.label }}
+            {{ form.confirm_password(autocomplete="new-password") }}
+            {% for error in form.confirm_password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="action-row">
+            {{ form.submit(class="button") }}
+            <a class="text-link" href="{{ url_for('auth.login') }}">Já tenho conta</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

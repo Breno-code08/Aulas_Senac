@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% block title %}Entrar | Espaço de Estudos{% endblock %}
+{% block content %}
+<section class="form-card auth-card">
+    <p class="eyebrow">Bem-vindo de volta</p>
+    <h1>Entrar</h1>
+    <p class="form-intro">Entre para acessar seus espaços e materiais de estudo.</p>
+    <form method="post" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="form-field">
+            {{ form.email.label }}
+            {{ form.email(autocomplete="email", placeholder="voce@exemplo.com") }}
+            {% for error in form.email.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="form-field">
+            {{ form.password.label }}
+            {{ form.password(autocomplete="current-password") }}
+            {% for error in form.password.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        <div class="action-row">
+            {{ form.submit(class="button") }}
+            <a class="text-link" href="{{ url_for('auth.register') }}">Criar conta</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

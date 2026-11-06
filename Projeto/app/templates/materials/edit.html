@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Editar {{ material.subject }} | Espaço de Estudos{% endblock %}
+{% block content %}
+<a class="back-link" href="{{ url_for('study_spaces.detail', space_id=space.id) }}">← Voltar para {{ space.name }}</a>
+<section class="form-card">
+    <p class="eyebrow">Atualizar conteúdo</p>
+    <h1>Editar conteúdo</h1>
+    <p class="form-intro">Altere o nome da matéria e organize seus conteúdos. Você pode adicionar ou remover qualquer conteúdo.</p>
+    <form method="post" enctype="multipart/form-data" action="{{ url_for('materials.edit', space_id=space.id, material_id=material.id) }}" novalidate>
+        {{ form.hidden_tag() }}
+        <div class="form-field">
+            {{ form.subject.label }}
+            {{ form.subject(placeholder="Ex.: Matemática — funções") }}
+            {% for error in form.subject.errors %}<span class="field-error">{{ error }}</span>{% endfor %}
+        </div>
+        {% include "materials/_content_entries.html" %}
+        <div class="action-row">
+            {{ form.submit(class="button") }}
+            <a class="button button-outline" href="{{ url_for('study_spaces.detail', space_id=space.id) }}">Cancelar</a>
+        </div>
+    </form>
+</section>
+{% endblock %}

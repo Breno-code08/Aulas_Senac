@@ -1,4 +1,5 @@
 from flask import current_app, flash, redirect, render_template, request, url_for
+from flask_login import current_user
 from sqlalchemy.exc import SQLAlchemyError
 
 from app.extensions import db
@@ -11,7 +12,10 @@ from app.services import study_space_service
 def list_spaces():
     search = request.args.get("q", "")
     try:
-        spaces = study_space_service.list_study_spaces(search)
+        spaces = study_space_service.list_study_spaces(
+            user_id=current_user.id,
+            search=search,
+        )
     except SQLAlchemyError:
         db.session.rollback()
         current_app.logger.exception("Falha ao consultar espaços de estudo")
@@ -26,6 +30,7 @@ def create():
     if form.validate_on_submit():
         try:
             space = study_space_service.create_study_space(
+                owner_id=current_user.id,
                 name=form.name.data,
                 description=form.description.data,
                 location=form.location.data,
@@ -44,7 +49,7 @@ def create():
 
 @study_spaces_bp.get("/<int:space_id>")
 def detail(space_id):
-    space = study_space_service.get_study_space(space_id)
+    space = study_space_service.get_study_space(space_id, user_id=current_user.id)
     if space is None:
         return render_template("errors/404.html"), 404
     return render_template(
@@ -56,7 +61,7 @@ def detail(space_id):
 
 @study_spaces_bp.route("/<int:space_id>/editar", methods=["GET", "POST"])
 def edit(space_id):
-    space = study_space_service.get_study_space(space_id)
+    space = study_space_service.get_study_space(space_id, user_id=current_user.id)
     if space is None:
         return render_template("errors/404.html"), 404
     form = StudySpaceForm(obj=space)
@@ -82,7 +87,7 @@ def edit(space_id):
 
 @study_spaces_bp.post("/<int:space_id>/excluir")
 def delete(space_id):
-    space = study_space_service.get_study_space(space_id)
+    space = study_space_service.get_study_space(space_id, user_id=current_user.id)
     if space is None:
         return render_template("errors/404.html"), 404
     try:

@@ -6,8 +6,8 @@ from app.extensions import db
 from app.models import StudySpace
 
 
-def list_study_spaces(search=""):
-    query = StudySpace.query
+def list_study_spaces(*, user_id, search=""):
+    query = StudySpace.query.filter_by(owner_id=user_id)
     term = search.strip()
     if term:
         pattern = f"%{term}%"
@@ -21,12 +21,13 @@ def list_study_spaces(search=""):
     return query.order_by(StudySpace.name.asc()).all()
 
 
-def get_study_space(space_id):
-    return db.session.get(StudySpace, space_id)
+def get_study_space(space_id, *, user_id):
+    return StudySpace.query.filter_by(id=space_id, owner_id=user_id).first()
 
 
-def create_study_space(*, name, description="", location="", color="sage", icon="book"):
+def create_study_space(*, owner_id, name, description="", location="", color="sage", icon="book"):
     space = StudySpace(
+        owner_id=owner_id,
         name=name.strip(),
         description=(description or "").strip(),
         location=(location or "").strip(),
@@ -49,7 +50,15 @@ def update_study_space(space, *, name, description="", location="", color="sage"
 
 
 def delete_study_space(space):
-    stored_names = [material.pdf_storage_name for material in space.materials if material.pdf_storage_name]
+    stored_names = [
+        stored_name
+        for material in space.materials
+        for stored_name in (
+            material.pdf_storage_name,
+            *(resource.pdf_storage_name for resource in material.resources),
+        )
+        if stored_name
+    ]
     db.session.delete(space)
     db.session.commit()
     upload_dir = Path(current_app.config["UPLOAD_FOLDER"])

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+{% block title %}Contato | Espaço de Estudos{% endblock %}
+{% block content %}
+<section class="info-page">
+    <header class="info-hero">
+        <p class="eyebrow">Fale com a gente</p>
+        <h1>Contato</h1>
+        <p>Tem uma dúvida ou sugestão sobre o Espaço de Estudos? Consulte o suporte ou use o canal de contato configurado para o projeto.</p>
+    </header>
+
+    <article class="contact-panel">
+        <div>
+            <h2>Canal de contato</h2>
+            {% if contact_email %}
+                <p>Envie sua mensagem para <a class="contact-email" href="mailto:{{ contact_email }}">{{ contact_email }}</a>.</p>
+            {% else %}
+                <p>O endereço de contato ainda não foi configurado.</p>
+            {% endif %}
+        </div>
+        {% if contact_email %}
+            <a class="button" href="mailto:{{ contact_email }}">Enviar e-mail</a>
+        {% endif %}
+    </article>
+
+    {% if not contact_email %}
+        <p class="config-note">Para habilitar o contato por e-mail, defina <code>CONTACT_EMAIL</code> no arquivo local <code>.env</code> e reinicie a aplicação. O endereço não é inventado nem exibido até ser configurado.</p>
+    {% endif %}
+
+    <div class="action-row">
+        <a class="button button-quiet" href="{{ url_for('main.support') }}">Consultar suporte</a>
+        <a class="button button-quiet" href="{{ url_for('main.about') }}">Sobre o projeto</a>
+    </div>
+</section>
+{% endblock %}

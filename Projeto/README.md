@@ -88,17 +88,31 @@ Os testes usam um banco SQLite temporário independente do banco local de desenv
 ## Rotas principais
 
 - `/` — página inicial
+- `/suporte` — orientações de uso e dúvidas frequentes
+- `/sobre` — informações sobre o projeto
+- `/contato` — canal de contato configurável por e-mail
 - `/espacos/` — listagem e busca
 - `/espacos/novo` — cadastro
 - `/espacos/<id>` — detalhes
 - `/espacos/<id>/editar` — edição
 - `/espacos/<id>/excluir` — exclusão via POST com confirmação
-- `/espacos/<id>/materiais` — adicionar assunto com conteúdo escrito obrigatório e PDF/videoaula opcionais
-- `/espacos/<id>/materiais/<material_id>/pdf` — baixar um PDF associado
+- `/espacos/<id>/materiais` — adicionar uma matéria e quantos conteúdos desejar
+- `/espacos/<id>/materiais/<material_id>/editar` — editar a matéria, adicionar ou remover qualquer conteúdo
+- `/espacos/<id>/materiais/<material_id>/conteudos/resource-<id>/concluir` — concluir um conteúdo
+- `/espacos/<id>/materiais/<material_id>/conteudos/resource-<id>/reabrir` — reabrir um conteúdo concluído
+- `/espacos/<id>/materiais/<material_id>/recursos/<resource_id>/pdf` — baixar o PDF de um conteúdo
 - `/espacos/<id>/materiais/<material_id>/excluir` — remover um material
 
-Cada material exige o nome do assunto e o conteúdo escrito; PDF e link de videoaula são opcionais e independentes. Os PDFs são armazenados em `instance/uploads/`, fora da pasta pública de arquivos estáticos, limitados a 16 MB e verificados pelo cabeçalho PDF antes de serem salvos. A migration deve ser aplicada após atualizar o código:
+## Contas e privacidade
+
+Crie uma conta em `/auth/cadastro` com e-mail e senha de 12 a 128 caracteres, entre por `/auth/login` e saia por `/auth/logout` (POST). Cada conta só acessa os próprios espaços e materiais.
+
+A migration de autenticação interrompe a atualização caso existam espaços sem proprietário, em vez de atribuí-los automaticamente a uma conta. Resolva os registros antigos antes de atualizar o banco.
+
+Cada matéria exige o nome do assunto, mas pode começar sem conteúdos. Cada conteúdo pode combinar descrição, PDF (até 16 MB) e link, e pode ser adicionado ou removido individualmente. Ao concluir todos os conteúdos, a matéria é concluída automaticamente; reabrir qualquer item devolve a matéria às pendentes. Os PDFs são armazenados em `instance/uploads/`, fora da pasta pública de arquivos estáticos, e verificados pelo cabeçalho PDF antes de serem salvos. Após atualizar o código, aplique as migrations:
 
 ```bash
 flask --app run.py db upgrade
 ```
+
+Para habilitar o link de contato por e-mail, defina `CONTACT_EMAIL` no `.env` local. O formulário de contato usa o aplicativo de e-mail padrão do dispositivo do visitante; o projeto não envia nem armazena mensagens.

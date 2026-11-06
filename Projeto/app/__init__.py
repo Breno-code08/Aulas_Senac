@@ -1,9 +1,10 @@
 from pathlib import Path
 
-from flask import Flask, render_template
+from flask import Flask, redirect, render_template, request, url_for
 from dotenv import load_dotenv
+from flask_login import current_user
 
-from app.extensions import csrf, db, migrate
+from app.extensions import csrf, db, login_manager, migrate
 
 
 def create_app(test_config=None):
@@ -19,20 +20,42 @@ def create_app(test_config=None):
 
     app.config.setdefault("UPLOAD_FOLDER", str(Path(app.instance_path) / "uploads"))
     if app.config.get("MAX_CONTENT_LENGTH") is None:
-        app.config["MAX_CONTENT_LENGTH"] = 16 * 1024 * 1024
+        app.config["MAX_CONTENT_LENGTH"] = 64 * 1024 * 1024
 
     Path(app.instance_path).mkdir(parents=True, exist_ok=True)
 
     db.init_app(app)
     migrate.init_app(app, db)
     csrf.init_app(app)
+    login_manager.init_app(app)
+    login_manager.login_view = "auth.login"
+    login_manager.login_message = "Entre na sua conta para continuar."
+    login_manager.login_message_category = "error"
 
-    from app.models import StudyMaterial, StudySpace
-    from app.routes import main_bp, study_spaces_bp, materials_bp
+    from app.models import StudyMaterial, StudySpace, User
+    from app.routes import auth_bp, main_bp, study_spaces_bp, materials_bp
 
+    app.register_blueprint(auth_bp)
     app.register_blueprint(main_bp)
     app.register_blueprint(study_spaces_bp)
     app.register_blueprint(materials_bp)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        try:
+            return db.session.get(User, int(user_id))
+        except (TypeError, ValueError):
+            return None
+
+    @app.before_request
+    def require_login():
+        public_endpoints = {
+            "auth.login",
+            "auth.register",
+            "static",
+        }
+        if request.endpoint not in public_endpoints and not current_user.is_authenticated:
+            return redirect(url_for("auth.login", next=request.full_path))
 
     @app.errorhandler(404)
     def not_found(error):

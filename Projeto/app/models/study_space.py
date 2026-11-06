@@ -20,6 +20,12 @@ SPACE_ICONS = {
 
 class StudySpace(db.Model):
     id = db.Column(db.Integer, primary_key=True)
+    owner_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
     name = db.Column(db.String(120), nullable=False, index=True)
     description = db.Column(db.Text, nullable=False, default="")
     location = db.Column(db.String(160), nullable=False, default="")
@@ -41,6 +47,7 @@ class StudySpace(db.Model):
         passive_deletes=True,
         order_by="StudyMaterial.created_at.desc()",
     )
+    owner = db.relationship("User", back_populates="study_spaces")
 
     def __repr__(self):
         return f"<StudySpace {self.name!r}>"

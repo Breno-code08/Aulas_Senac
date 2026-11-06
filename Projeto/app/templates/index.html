@@ -2,7 +2,10 @@
 {% block title %}Início | Espaço de Estudos{% endblock %}
 {% block content %}
 <section class="hero">
-    <p class="eyebrow">Seu espaço, seu foco</p>
+    <div class="hero-brand">
+        <span class="home-logo-tile"><img class="home-logo" src="{{ url_for('static', filename='images/study-logo.png') }}" alt=""></span>
+        <p class="eyebrow">Seu espaço, seu foco</p>
+    </div>
     <h1>Organize seus materiais de estudo.</h1>
     <p class="hero-copy">Reúna assuntos, PDFs e videoaulas no seu espaço pessoal de estudos.</p>
     <a class="button" href="{{ url_for('study_spaces.list_spaces') }}">Explorar espaços</a>

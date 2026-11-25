@@ -31,6 +31,32 @@ def local_secret():
 
 def create_local_app():
     os.environ.setdefault('SECRET_KEY', local_secret())
+    load_dotenv(ROOT / '.env')
+    database_url = os.getenv(
+        'DATABASE_URL',
+        'mysql+pymysql://root@127.0.0.1:3306/conectta?charset=utf8mb4',
+    )
+    if database_url.startswith('mysql'):
+        from sqlalchemy.engine import make_url
+        import pymysql
+
+        url = make_url(database_url)
+        connection = pymysql.connect(
+            host=url.host or '127.0.0.1',
+            port=url.port or 3306,
+            user=url.username or 'root',
+            password=url.password or '',
+            charset='utf8mb4',
+        )
+        try:
+            with connection.cursor() as cursor:
+                cursor.execute(
+                    'CREATE DATABASE IF NOT EXISTS `' +
+                    (url.database or 'conectta').replace('`', '``') +
+                    '` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
+                )
+        finally:
+            connection.close()
     from app import create_app
     from flask_migrate import upgrade
     from app.services.catalog import seed_database

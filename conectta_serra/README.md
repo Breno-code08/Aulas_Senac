@@ -2,24 +2,19 @@
 
 Projeto web regional de serviços para Serra Talhada–PE. Backend em **Python**, com interface em HTML, CSS e JavaScript. Por padrão, os dados ficam no banco **MySQL** do XAMPP.
 
-## Começar no VS Code
+## Instalar no Windows (incluindo outro computador)
 
-1. Extraia o ZIP inteiro. Mantenha `iniciar.py`, `requirements.txt`, `app/` e `migrations/` juntos.
-2. No VS Code, use **Arquivo → Abrir Pasta** e abra a pasta `conectta_serra`.
-3. Abra **Terminal → Novo Terminal**.
-4. Com Python 3.12 ou superior instalado, execute:
+1. Instale **Python 3.12 ou superior** e o **XAMPP**. Na instalação do Python, marque **Add Python to PATH**.
+2. Copie a pasta completa do projeto para o computador. Mantenha juntos os arquivos `.bat`, `iniciar.py`, `requirements.txt`, `app/` e `migrations/`.
+3. Abra o XAMPP Control Panel e inicie **MySQL**.
+4. Dê duplo clique em `preparar_pc.bat` uma única vez. Ele cria o ambiente isolado `.venv` e instala as dependências.
+5. Dê duplo clique em `iniciar_site.bat`. Ele verifica o MySQL, abre o navegador e inicia o site.
 
 ```bash
-python -m pip install -r requirements.txt
-python iniciar.py
+http://127.0.0.1:5000/
 ```
 
-5. Abra **http://127.0.0.1:5000/** no navegador. Mantenha o terminal aberto enquanto usa o site.
-6. Para encerrar, pressione **Ctrl+C** no terminal.
-
-No Windows, se `python` não for reconhecido e o comando `py` estiver disponível, use `py -m pip install -r requirements.txt` e `py iniciar.py`.
-
-Antes de iniciar, ligue o MySQL no XAMPP e crie o banco `conectta` no phpMyAdmin. `iniciar.py` prepara as tabelas pelas migrations, gera uma chave de sessão local e carrega os perfis fictícios na primeira execução. Nas próximas execuções, preserva os dados cadastrados. O banco SQLite usado por versões anteriores não é copiado automaticamente para o MySQL.
+O iniciador cria automaticamente o banco `conectta`, prepara as tabelas e carrega dados de demonstração na primeira execução. Mantenha abertas as janelas do XAMPP/MySQL e do site enquanto estiver usando o sistema; feche a janela do site ou pressione **Ctrl+C** para encerrá-lo.
 
 ## Ambiente virtual (opcional, recomendado)
 
@@ -82,6 +77,11 @@ Roteiro sugerido:
 conectta_serra/
   iniciar.py                  # prepara o banco e inicia o site
   run.py                      # entrada alternativa para Flask CLI
+  preparar_pc.bat             # cria ambiente e instala dependências no Windows
+  iniciar_site.bat            # verifica MySQL e inicia o site
+  exportar_banco.bat          # gera backup SQL para transferência
+  importar_banco.bat          # restaura backup SQL
+  database_transfer.py        # rotinas de backup MySQL
   requirements.txt
   .env.example
   app/
@@ -103,9 +103,21 @@ A interface usa navegação por fragmentos e conversa com a API Flask. HTML, CSS
 
 ## Banco e configurações
 
-O banco padrão é o MySQL em `127.0.0.1:3306`, esquema `conectta`, usuário `root` e senha vazia (padrão indicado para este XAMPP). Os cadastros do app ficam na tabela `users`; uma tabela preexistente chamada `usuarios` permanece intacta e não é usada pelo app. Se sua instalação tiver senha ou outros dados de conexão, copie `.env.example` para `.env` e ajuste `DATABASE_URL`, por exemplo `mysql+pymysql://root:SENHA@127.0.0.1:3306/conectta?charset=utf8mb4`. A senha deve ficar somente no `.env`, que não deve ser compartilhado.
+O banco padrão é o MySQL em `127.0.0.1:3306`, esquema `conectta`, usuário `root` e senha vazia. Os cadastros do app ficam na tabela `users`; uma tabela preexistente chamada `usuarios` permanece intacta e não é usada pelo app. Se sua instalação tiver senha ou outros dados de conexão, copie `.env.example` para `.env` e ajuste `DATABASE_URL`, por exemplo `mysql+pymysql://root:SENHA@127.0.0.1:3306/conectta?charset=utf8mb4`. A senha deve ficar somente no `.env`, que não deve ser compartilhado.
 
-Um arquivo `.env` é opcional. Para personalizar, copie `.env.example` e configure `SECRET_KEY`, `DATABASE_URL` e `DEMO_MODE`. Se `SECRET_KEY` não for informada, o iniciador gera uma chave local persistente. Para usar SQLite em vez do MySQL, defina `DATABASE_URL=sqlite:///conectta.db`. Os testes usam SQLite em memória.
+### Exportar e importar em outro computador
+
+No computador original, inicie o MySQL do XAMPP e execute `exportar_banco.bat`. Ele gera `conectta-serra-backup.sql`. Copie esse arquivo e a pasta do projeto para o outro computador. Não copie `.venv`, `.env` nem `instance/session.key`; não compartilhe credenciais.
+
+No outro computador:
+
+1. Instale Python e XAMPP e inicie o MySQL.
+2. Execute `preparar_pc.bat`.
+3. Execute `iniciar_site.bat` uma vez para criar o banco vazio e as tabelas; feche o site depois.
+4. Execute `importar_banco.bat` e informe o caminho do arquivo `conectta-serra-backup.sql`. Confirme a substituição das tabelas quando solicitado.
+5. Execute `iniciar_site.bat` novamente.
+
+Por padrão, o MySQL local do XAMPP usa `root` sem senha. Se o computador tiver senha ou outra porta, crie `.env` a partir de `.env.example` e ajuste `DATABASE_URL`. O arquivo `.env` é local e não deve ser incluído na cópia. O iniciador cria uma chave de sessão local automaticamente. Os testes usam SQLite em memória.
 
 Para futuras mudanças nos models:
 

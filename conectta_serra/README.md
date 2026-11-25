@@ -1,6 +1,6 @@
-# Conectta Serra — Python + Flask + SQLite
+# Conectta Serra — Python + Flask + MySQL
 
-Projeto web regional de serviços para Serra Talhada–PE. Backend em **Python**, com interface em HTML, CSS e JavaScript. Os dados ficam no banco **SQLite**, e não no armazenamento do navegador.
+Projeto web regional de serviços para Serra Talhada–PE. Backend em **Python**, com interface em HTML, CSS e JavaScript. Por padrão, os dados ficam no banco **MySQL** do XAMPP.
 
 ## Começar no VS Code
 
@@ -19,7 +19,7 @@ python iniciar.py
 
 No Windows, se `python` não for reconhecido e o comando `py` estiver disponível, use `py -m pip install -r requirements.txt` e `py iniciar.py`.
 
-`iniciar.py` prepara o banco pelas migrations, gera uma chave de sessão local e carrega os perfis fictícios na primeira execução. Nas próximas execuções, preserva os dados cadastrados. Não é necessário instalar um servidor de banco de dados.
+Antes de iniciar, ligue o MySQL no XAMPP e crie o banco `conectta` no phpMyAdmin. `iniciar.py` prepara as tabelas pelas migrations, gera uma chave de sessão local e carrega os perfis fictícios na primeira execução. Nas próximas execuções, preserva os dados cadastrados. O banco SQLite usado por versões anteriores não é copiado automaticamente para o MySQL.
 
 ## Ambiente virtual (opcional, recomendado)
 
@@ -103,9 +103,9 @@ A interface usa navegação por fragmentos e conversa com a API Flask. HTML, CSS
 
 ## Banco e configurações
 
-O banco padrão fica em `instance/conectta.db`. A chave local fica em `instance/session.key`. A pasta `instance/`, `.env` e ambientes virtuais não fazem parte da distribuição. Faça cópia do arquivo do banco com o servidor parado caso queira guardar sua demonstração.
+O banco padrão é o MySQL em `127.0.0.1:3306`, esquema `conectta`, usuário `root` e senha vazia (padrão indicado para este XAMPP). Os cadastros do app ficam na tabela `users`; uma tabela preexistente chamada `usuarios` permanece intacta e não é usada pelo app. Se sua instalação tiver senha ou outros dados de conexão, copie `.env.example` para `.env` e ajuste `DATABASE_URL`, por exemplo `mysql+pymysql://root:SENHA@127.0.0.1:3306/conectta?charset=utf8mb4`. A senha deve ficar somente no `.env`, que não deve ser compartilhado.
 
-Um arquivo `.env` é opcional. Para personalizar, copie `.env.example` e configure `SECRET_KEY`, `DATABASE_URL` e `DEMO_MODE`. Se `SECRET_KEY` não for informada, o iniciador gera uma chave local persistente. O esquema e os testes usam SQLite. Outro banco exige driver e validação próprios.
+Um arquivo `.env` é opcional. Para personalizar, copie `.env.example` e configure `SECRET_KEY`, `DATABASE_URL` e `DEMO_MODE`. Se `SECRET_KEY` não for informada, o iniciador gera uma chave local persistente. Para usar SQLite em vez do MySQL, defina `DATABASE_URL=sqlite:///conectta.db`. Os testes usam SQLite em memória.
 
 Para futuras mudanças nos models:
 
